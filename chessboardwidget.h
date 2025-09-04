@@ -46,7 +46,6 @@ public:
     void setMoveColor(const QColor& c) { moveColor_ = c; update(); }
     void setLastMoveColor(const QColor& c) { lastMoveColor_ = c; update(); }
 
-    // Imposta un pezzo (stringa disegnata al centro casella). Esempi: "♙", "♞", "K", "q" ecc.
     // Carica immagini (una volta sola all’avvio)
     void loadPieceImage(const QString& id, const QString& filePath) {
         auto* renderer = new QSvgRenderer(filePath, this);
@@ -127,7 +126,7 @@ protected:
                 const int vFile = viewFile(f);
                 const int vRank = viewRank(r);
                 const QRect rect(marginX + vFile * square, marginY + (7 - vRank) * square, square, square);
-                const bool isLight = ((f + r) % 2 == 0);
+                const bool isLight = ((f + r) % 2 == 1);
                 p.fillRect(rect, isLight ? light_ : dark_);
             }
         }
@@ -188,14 +187,12 @@ protected:
         tiny.setPointSizeF(qMax(8.0, square * 0.15));
         p.setFont(tiny);
         for (int i = 0; i < 8; ++i) {
-            // File letters a..h dal punto di vista del bianco
             const int fileIdx = (orientation_ == Orientation::WhiteBottom) ? i : (7 - i);
             const QChar letter('a' + fileIdx);
             QRect bottom(marginX + i * square, marginY + 7 * square, square, square);
             QRect top(marginX + i * square, marginY, square, square);
             p.drawText(bottom.adjusted(2, 0, -2, -2), Qt::AlignRight | Qt::AlignBottom, QString(letter));
 
-            // Rank numbers 1..8 dal punto di vista del bianco
             const int rankIdx = (orientation_ == Orientation::WhiteBottom) ? i : (7 - i);
             const int number = rankIdx + 1;
             QRect left(marginX, marginY + (7 - i) * square, square, square);
@@ -267,49 +264,6 @@ private:
     QVector<QPair<int,int>> legalMoves_;
     QPair<QPair<int,int>, QPair<int,int>> lastMove_{{-1,-1},{-1,-1}};
 };
-
-/* ------------------------------------------------------------
-USO RAPIDO (esempio):
-
-#include <QApplication>
-#include <QMainWindow>
-
-int main(int argc, char** argv){
-    QApplication app(argc, argv);
-    QMainWindow w;
-    auto* board = new ChessBoardWidget;
-
-    // piazza qualche pezzo con unicode
-    board->setPieceAt(4, 0, "♚"); // re nero e8
-    board->setPieceAt(4, 7, "♔"); // re bianco e1
-    for (int f=0; f<8; ++f) {
-        board->setPieceAt(f, 1, "♟"); // pedoni neri 2a traversa
-        board->setPieceAt(f, 6, "♙"); // pedoni bianchi 7a
-    }
-
-    QObject::connect(board, &ChessBoardWidget::squareClicked, [&](int f,int r){
-        qDebug("Clicked: %c%d", 'a'+f, r+1);
-    });
-    QObject::connect(board, &ChessBoardWidget::moveRequested, [&](int f1,int r1,int f2,int r2){
-        qDebug("Move: %c%d -> %c%d", 'a'+f1, r1+1, 'a'+f2, r2+1);
-        // esempio: aggiorna ultima mossa e muovi simbolo
-        auto sym = board->pieceAt(f1,r1);
-        board->clearSquare(f1,r1);
-        board->setPieceAt(f2,r2,sym);
-        board->setLastMove({f1,r1}, {f2,r2});
-    });
-
-    w.setCentralWidget(board);
-    w.resize(560, 560);
-    w.show();
-    return app.exec();
-}
-
-NOTE:
-- I simboli Unicode potrebbero variare come font. Per resa migliore puoi impostare un QFont dedicato (es. "Noto Sans Symbols2") o usare pixmap SVG/PNG.
-- Collega la tua logica di generazione mosse: quando selezioni un pezzo, chiama setLegalMoves([...]) per mostrare i target possibili.
-- setOrientation(ChessBoardWidget::Orientation::BlackBottom) per ruotare la scacchiera.
------------------------------------------------------------- */
 
 
 #endif // CHESSBOARDWIDGET_H

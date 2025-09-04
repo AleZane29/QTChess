@@ -23,18 +23,18 @@ FORMS += \
     mainwindow.ui
 
 RESOURCES += \
-    resources/bp.png \
-    resources/bk.png \
-    resources/bq.png \
-    resources/bn.png \
-    resources/br.png \
+    resources/bp.svg \
+    resources/bk.svg \
+    resources/bq.svg \
+    resources/bn.svg \
+    resources/br.svg \
     resources/bb.svg \
-    resources/wp.png \
-    resources/wk.png \
-    resources/wq.png \
-    resources/wn.png \
-    resources/wr.png \
-    resources/wb.png
+    resources/wp.svg \
+    resources/wk.svg \
+    resources/wq.svg \
+    resources/wn.svg \
+    resources/wr.svg \
+    resources/wb.svg
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
