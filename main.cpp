@@ -55,7 +55,10 @@ int main(int argc, char *argv[])
     }
 
     QObject::connect(board, &ChessBoardWidget::squareClicked, [&](int f,int r){
-        qDebug("Clicked: %c%d", 'a'+f, r+1);
+        if(board->pieceAt(f,r)!=""){
+        qDebug() << "Clicked:" << char('a' + f) << r+1;
+        board->setLegalMoves(f,r);
+        }
     });
     QObject::connect(board, &ChessBoardWidget::moveRequested, [&](int f1,int r1,int f2,int r2){
         qDebug("Move: %c%d -> %c%d", 'a'+f1, r1+1, 'a'+f2, r2+1);
@@ -63,6 +66,7 @@ int main(int argc, char *argv[])
         board->clearSquare(f1,r1);
         board->setPieceAt(f2,r2,sym);
         board->setLastMove({f1,r1}, {f2,r2});
+        board->changeTurn();
     });
 
     w.setCentralWidget(board);

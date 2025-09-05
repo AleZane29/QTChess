@@ -13,3 +13,15 @@ MainWindow::~MainWindow()
 {
     delete ui;
 }
+
+void MainWindow::on_actionSinglePLayer_triggered()
+{
+
+}
+
+
+void MainWindow::on_actionTwoPlayers_triggered()
+{
+
+}
+

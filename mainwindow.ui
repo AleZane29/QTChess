@@ -33,8 +33,27 @@
      <height>25</height>
     </rect>
    </property>
+   <widget class="QMenu" name="menuMenu">
+    <property name="title">
+     <string>Menu</string>
+    </property>
+    <addaction name="separator"/>
+    <addaction name="actionSinglePLayer"/>
+    <addaction name="actionTwoPlayers"/>
+   </widget>
+   <addaction name="menuMenu"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
+  <action name="actionSinglePLayer">
+   <property name="text">
+    <string>Single Player</string>
+   </property>
+  </action>
+  <action name="actionTwoPlayers">
+   <property name="text">
+    <string>Two Players</string>
+   </property>
+  </action>
  </widget>
  <resources/>
  <connections/>

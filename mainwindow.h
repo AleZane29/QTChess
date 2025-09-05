@@ -17,6 +17,11 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+private slots:
+    void on_actionSinglePLayer_triggered();
+
+    void on_actionTwoPlayers_triggered();
+
 private:
     Ui::MainWindow *ui;
 };
