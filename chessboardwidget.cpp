@@ -61,6 +61,7 @@ void ChessBoardWidget::setSelectedSquare(int file, int rank) {
 
 void ChessBoardWidget::setLegalMoves(int f, int r) {
     QString a = pieceAt(f,r);
+    //AGGIUNGERE EN PASSANT
     if(this->getTurn()==ChessBoardWidget::Turn::WhiteTurn && a.startsWith("w")){
         //WhitePawns moves check
         if(a.endsWith("p")){
