@@ -204,22 +204,25 @@ protected:
             qDebug() << this->pieceAt(file, rank);
             emit squareClicked(file, rank);
 
-        // Comportamento base: primo click seleziona, secondo propone mossa
-        if (selected.first == -1) {
-            selected = {file, rank};
-            update();
-        } else if(this->legalMoves.contains({file, rank})){
-            emit moveRequested(selected.first, selected.second, file, rank);
-            selected = {-1, -1};
-            legalMoves.clear();
-            update();
-        } else //if(selected.first==file && selected.second==rank)
-        {
-            selected = {-1, -1};
-            legalMoves.clear();
-            update();
-            emit squareClicked(file, rank);
-        }
+            // Comportamento base: primo click seleziona, secondo propone mossa
+            if (selected.first == -1) {
+                selected = {file, rank};
+            } else if(this->legalMoves.contains({file, rank})){
+                emit moveRequested(selected.first, selected.second, file, rank);
+                selected = {-1, -1};
+                legalMoves.clear();
+            } else if((this->pieceAt(file, rank).startsWith("w") && this->getTurn()==Turn::WhiteTurn)
+                       || (this->pieceAt(file, rank).startsWith("b") && this->getTurn()==Turn::BlackTurn))
+            {
+                selected = {file, rank};
+                legalMoves.clear();
+                emit squareClicked(file, rank);
+
+            } else {
+                selected = {-1, -1};
+                legalMoves.clear();
+            }
+             update();
         }
     }
 

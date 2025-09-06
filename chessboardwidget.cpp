@@ -65,30 +65,48 @@ void ChessBoardWidget::setLegalMoves(int f, int r) {
     if(this->getTurn()==ChessBoardWidget::Turn::WhiteTurn && a.startsWith("w")){
         //WhitePawns moves check
         if(a.endsWith("p")){
-            legalMoves={{f,r+1}};
+            if(pieceAt(f,r+1)==""){
+                legalMoves={{f,r+1}};
+                if(r==1 && pieceAt(f,r+2)==""){
+                    legalMoves+={{f,r+2}};
+                }
+            }
             if(pieceAt(f-1,r+1).startsWith("b")){
                 legalMoves+={{f-1,r+1}};
             }
             if(pieceAt(f+1,r+1).startsWith("b")){
                 legalMoves+={{f+1,r+1}};
             }
-            if(r==1){
-                legalMoves+={{f,r+2}};
+            if(r==4 && lastMove.second.second==4){
+                if(lastMove.second.first==f-1){
+                    legalMoves+={{f-1,r+1}};
+                } else if(lastMove.second.first==f+1){
+                    legalMoves+={{f+1,r+1}};
+                }
             }
         }
         update();
     } else if (this->getTurn()==ChessBoardWidget::Turn::BlackTurn && a.startsWith("b")){
         //BlackPawns moves check
         if(a.endsWith("p")){
-            legalMoves={{f,r-1}};
+            if(pieceAt(f,r-1)==""){
+                legalMoves={{f,r-1}};
+                if(r==6 && pieceAt(f,r-2)==""){
+                    legalMoves+={{f,r-2}};
+                }
+            }
             if(pieceAt(f-1,r-1).startsWith("w")){
                 legalMoves+={{f-1,r-1}};
             }
             if(pieceAt(f+1,r-1).startsWith("w")){
                 legalMoves+={{f+1,r-1}};
             }
-            if(r==6){
-                legalMoves+={{f,r-2}};
+            if(r==3 && lastMove.second.second==3){
+                if(lastMove.second.first==f-1){
+                    legalMoves+={{f-1,r-1}};
+                } else if(lastMove.second.first==f+1){
+                    legalMoves+={{f+1,r-1}};
+                }
             }
         }
         update();
