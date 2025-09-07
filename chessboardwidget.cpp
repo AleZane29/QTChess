@@ -85,6 +85,33 @@ void ChessBoardWidget::setLegalMoves(int f, int r) {
                 }
             }
         }
+        //WhiteRooks moves check
+        else if(a.endsWith("r")){
+            int i=1;
+            while(pieceAt(f,r+i)=="" && inBounds(f,r+i)){
+                legalMoves+={{f,r+i}};
+                i++;
+            }
+            if(pieceAt(f,r+i).startsWith("b")){legalMoves+={{f,r+i}};}
+            i=1;
+            while(pieceAt(f,r-i)=="" && inBounds(f,r-i)){
+                legalMoves+={{f,r-i}};
+                i++;
+            }
+            if(pieceAt(f,r-i).startsWith("b")){legalMoves+={{f,r-i}};}
+            i=1;
+            while(pieceAt(f+i,r)=="" && inBounds(f+i,r)){
+                legalMoves+={{f+i,r}};
+                i++;
+            }
+            if(pieceAt(f+i,r).startsWith("b")){legalMoves+={{f+i,r}};}
+            i=1;
+            while(pieceAt(f-i,r)=="" && inBounds(f-i,r)){
+                legalMoves+={{f-i,r}};
+                i++;
+            }
+            if(pieceAt(f-i,r).startsWith("b")){legalMoves+={{f-i,r}};}
+        }
         update();
     } else if (this->getTurn()==ChessBoardWidget::Turn::BlackTurn && a.startsWith("b")){
         //BlackPawns moves check
@@ -108,6 +135,33 @@ void ChessBoardWidget::setLegalMoves(int f, int r) {
                     legalMoves+={{f+1,r-1}};
                 }
             }
+        }
+        //BlackRooks moves check
+        else if(a.endsWith("r")){
+            int i=1;
+            while(pieceAt(f,r+i)=="" && inBounds(f,r+i)){
+                legalMoves+={{f,r+i}};
+                i++;
+            }
+            if(pieceAt(f,r+i).startsWith("w")){legalMoves+={{f,r+i}};}
+            i=1;
+            while(pieceAt(f,r-i)=="" && inBounds(f,r-i)){
+                legalMoves+={{f,r-i}};
+                i++;
+            }
+            if(pieceAt(f,r-i).startsWith("w")){legalMoves+={{f,r-i}};}
+            i=1;
+            while(pieceAt(f+i,r)=="" && inBounds(f+i,r)){
+                legalMoves+={{f+i,r}};
+                i++;
+            }
+            if(pieceAt(f+i,r).startsWith("w")){legalMoves+={{f+i,r}};}
+            i=1;
+            while(pieceAt(f-i,r)=="" && inBounds(f-i,r)){
+                legalMoves+={{f-i,r}};
+                i++;
+            }
+            if(pieceAt(f-i,r).startsWith("w")){legalMoves+={{f-i,r}};}
         }
         update();
     }
