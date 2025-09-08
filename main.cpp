@@ -59,8 +59,13 @@ int main(int argc, char *argv[])
         board->setLegalMoves(f,r);
     });
     QObject::connect(board, &ChessBoardWidget::moveRequested, [&](int f1,int r1,int f2,int r2){
-        qDebug("Move: %c%d -> %c%d", 'a'+f1, r1+1, 'a'+f2, r2+1);
+        //qDebug("Move: %c%d -> %c%d", 'a'+f1, r1+1, 'a'+f2, r2+1);
         auto sym = board->pieceAt(f1,r1);
+
+        if(board->pieceAt(f2,r2)!="" || sym.endsWith("p")){
+            board->setHalfMoves(0);
+        }else{board->addHalfMoves();}
+
         //En passant
         if(sym.endsWith("p") && (f2==f1-1 || f2==f1+1) && board->pieceAt(f2,r2)==""){
             if(sym.startsWith("w")){
@@ -68,12 +73,48 @@ int main(int argc, char *argv[])
             } else {
                 board->clearSquare(f2,r2+1);
             }
+            board->setHalfMoves(0);
         }
+        //Castling
+        if(sym.endsWith("k") && f1-f2==2){
+            board->setPieceAt(3, r2, board->clearSquare(0,r2));
+        }
+        if(sym.endsWith("k") && f1-f2==-2){
+            board->setPieceAt(5, r2, board->clearSquare(7,r2));
+        }
+
+        //Remove castling from future moves
+        if(sym.endsWith("k")){
+            if(sym.startsWith("w")){
+                board->setWCastLong(false);
+                board->setWCastShort(false);
+            } else {
+                board->setBCastLong(false);
+                board->setBCastShort(false);
+            }
+        }
+        if(sym.endsWith("r")){
+            if(sym.startsWith("w")){
+                if(f1==0){
+                    board->setWCastLong(false);
+                }else{
+                    board->setWCastShort(false);
+                }
+            } else {
+                if(f1==0){
+                    board->setBCastLong(false);
+                }else{
+                    board->setBCastShort(false);
+                }
+            }
+        }
+
         board->clearSquare(f1,r1);
         board->setPieceAt(f2,r2,sym);
         board->setLastMove({f1,r1}, {f2,r2});
-
+        if(board->getTurn()==ChessBoardWidget::Turn::BlackTurn){board->addFullMoves();}
         board->changeTurn();
+        qDebug()<<board->getFEN();
     });
 
     w.setCentralWidget(board);

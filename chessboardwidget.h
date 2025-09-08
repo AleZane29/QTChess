@@ -33,6 +33,12 @@ private:
     QPair<int,int> selected{-1, -1};
     QVector<QPair<int,int>> legalMoves;
     QPair<QPair<int,int>, QPair<int,int>> lastMove{{-1,-1},{-1,-1}};
+    bool wCastShort=true;
+    bool wCastLong=true;
+    bool bCastShort=true;
+    bool bCastLong=true;
+    int FullMoves=1;
+    int HalfMoves=0;
 
 public:
     explicit ChessBoardWidget(QWidget* parent = nullptr)
@@ -56,6 +62,17 @@ public:
     void setMoveColor(const QColor& c);
     void setLastMoveColor(const QColor& c);
 
+    void setWCastShort(bool b);
+    void setWCastLong(bool b);
+    void setBCastShort(bool b);
+    void setBCastLong(bool b);
+
+    int getFullMoves();
+    void addFullMoves();
+    int getHalfMoves();
+    void addHalfMoves();
+    void setHalfMoves(int num);
+
     // Carica immagini (una volta sola all’avvio)
     void loadPieceImage(const QString& id, const QString& filePath);
 
@@ -65,7 +82,7 @@ public:
     QString pieceAt(int file, int rank) const;
 
     // Rimuovi pezzo
-    void clearSquare(int file, int rank);
+    QString clearSquare(int file, int rank);
 
     // Pulisci tutta la scacchiera
     void clearBoard();
@@ -76,6 +93,10 @@ public:
     void setLegalMoves(int file, int rank);
 
     void setLastMove(QPair<int,int> from, QPair<int,int> to);
+
+    //Get or Load pieces positions trough FEN annotation
+    QString getFEN();
+    void loadFEN(QString FEN);
 
 signals:
     // Emette quando l'utente clicca una casella (file: 0..7 = a..h, rank: 0..7 = 1..8 dalla prospettiva del bianco)
