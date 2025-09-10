@@ -6,7 +6,7 @@ ChessBoardWidget::Turn ChessBoardWidget::getTurn() const {return playerTurn;}
 void ChessBoardWidget::setOrientation(ChessBoardWidget::Orientation o) { boardOrientation = o; update(); }
 ChessBoardWidget::Orientation ChessBoardWidget::orientation() const { return boardOrientation; }
 
-// Colori personalizzabili
+// colori personalizzabili
 void ChessBoardWidget::setLightColor(const QColor& c) { light = c; update(); }
 void ChessBoardWidget::setDarkColor(const QColor& c) { dark = c; update(); }
 void ChessBoardWidget::setHighlightColor(const QColor& c) { highlight = c; update(); }
@@ -24,6 +24,7 @@ void ChessBoardWidget::addFullMoves(){FullMoves++;};
 int ChessBoardWidget::getHalfMoves(){return HalfMoves;};
 void ChessBoardWidget::addHalfMoves(){HalfMoves++;};
 void ChessBoardWidget::setHalfMoves(int num){HalfMoves=num;};
+void ChessBoardWidget::setFullMoves(int num){FullMoves=num;};
 
 // Carica immagini (una volta sola all’avvio)
 void ChessBoardWidget::loadPieceImage(const QString& id, const QString& filePath) {
@@ -73,214 +74,180 @@ void ChessBoardWidget::setSelectedSquare(int file, int rank) {
     update();
 }
 
+bool ChessBoardWidget::isSquareAttacked(int file, int rank){
+    for(int x=7; x>=0; x--){
+        for(int y=0; y<8; y++){
+            if(pieceAt(y,x).startsWith("b") && this->getTurn()==ChessBoardWidget::Turn::WhiteTurn){
+                if(pieceLegalMoves(y,x, "w", "b").contains({file,rank})){
+                    return true;
+                }
+            } else if(pieceAt(y,x).startsWith("w") && this->getTurn()==ChessBoardWidget::Turn::BlackTurn){
+                if(pieceLegalMoves(y,x,"b", "w").contains({file,rank})){
+                    return true;
+                }
+            }
+        }
+    }
+    return false;
+}
+
+QVector<QPair<int,int>> ChessBoardWidget::pieceLegalMoves(int f, int r, QString col1, QString col2){
+    QVector<QPair<int,int>> res;
+    QString a = pieceAt(f,r);
+
+    //WhitePawns moves
+    if(a=="wp"){
+        if(pieceAt(f,r+1)==""){
+            res={{f,r+1}};
+            if(r==1 && pieceAt(f,r+2)==""){
+                res+={{f,r+2}};
+            }
+        }
+        if(pieceAt(f-1,r+1).startsWith("b")){
+            res+={{f-1,r+1}};
+        }
+        if(pieceAt(f+1,r+1).startsWith("b")){
+            res+={{f+1,r+1}};
+        }
+        if(r==4 && lastMove.second.second==4){
+            if(lastMove.second.first==f-1 && pieceAt(f-1,r)=="bp"){
+                res+={{f-1,r+1}};
+            } else if(lastMove.second.first==f+1 && pieceAt(f+1,r)=="bp"){
+                res+={{f+1,r+1}};
+            }
+        }
+    }
+    //BlackPawns moves
+    if(a=="bp"){
+        if(pieceAt(f,r-1)==""){
+            res={{f,r-1}};
+            if(r==6 && pieceAt(f,r-2)==""){
+                res+={{f,r-2}};
+            }
+        }
+        if(pieceAt(f-1,r-1).startsWith("w")){
+            res+={{f-1,r-1}};
+        }
+        if(pieceAt(f+1,r-1).startsWith("w")){
+            res+={{f+1,r-1}};
+        }
+        if(r==3 && lastMove.second.second==3){
+            if(lastMove.second.first==f-1 && pieceAt(f-1,r)=="wp"){
+                res+={{f-1,r-1}};
+            } else if(lastMove.second.first==f+1 && pieceAt(f+1,r)=="wp"){
+                res+={{f+1,r-1}};
+            }
+        }
+    }
+    //Rooks-Queen moves
+    else if(a.endsWith("r") || a.endsWith("q")){
+        int i=1;
+        while(pieceAt(f,r+i)=="" && inBounds(f,r+i)){
+            res+={{f,r+i}};
+            i++;
+        }
+        if(pieceAt(f,r+i).startsWith(col1)){res+={{f,r+i}};}
+        i=1;
+        while(pieceAt(f,r-i)=="" && inBounds(f,r-i)){
+            res+={{f,r-i}};
+            i++;
+        }
+        if(pieceAt(f,r-i).startsWith(col1)){res+={{f,r-i}};}
+        i=1;
+        while(pieceAt(f+i,r)=="" && inBounds(f+i,r)){
+            res+={{f+i,r}};
+            i++;
+        }
+        if(pieceAt(f+i,r).startsWith(col1)){res+={{f+i,r}};}
+        i=1;
+        while(pieceAt(f-i,r)=="" && inBounds(f-i,r)){
+            res+={{f-i,r}};
+            i++;
+        }
+        if(pieceAt(f-i,r).startsWith(col1)){res+={{f-i,r}};}
+    }
+    //Bishops-Queen moves
+    if(a.endsWith("b") || a.endsWith("q")){
+        int i=1;
+        while(pieceAt(f+i,r+i)=="" && inBounds(f+i,r+i)){
+            res+={{f+i,r+i}};
+            i++;
+        }
+        if(pieceAt(f+i,r+i).startsWith(col1)){res+={{f+i,r+i}};}
+        i=1;
+        while(pieceAt(f+i,r-i)=="" && inBounds(f+i,r-i)){
+            res+={{f+i,r-i}};
+            i++;
+        }
+        if(pieceAt(f+i,r-i).startsWith(col1)){res+={{f+i,r-i}};}
+        i=1;
+        while(pieceAt(f-i,r+i)=="" && inBounds(f-i,r+i)){
+            res+={{f-i,r+i}};
+            i++;
+        }
+        if(pieceAt(f-i,r+i).startsWith(col1)){res+={{f-i,r+i}};}
+        i=1;
+        while(pieceAt(f-i,r-i)=="" && inBounds(f-i,r-i)){
+            res+={{f-i,r-i}};
+            i++;
+        }
+        if(pieceAt(f-i,r-i).startsWith(col1)){res+={{f-i,r-i}};}
+    }
+    //Knights moves
+    else if(a.endsWith("n")){
+        if(inBounds(f+1,r+2) && !pieceAt(f+1,r+2).startsWith(col2)){res+={{f+1,r+2}};}
+        if(inBounds(f-1,r+2) && !pieceAt(f-1,r+2).startsWith(col2)){res+={{f-1,r+2}};}
+        if(inBounds(f+1,r-2) && !pieceAt(f+1,r-2).startsWith(col2)){res+={{f+1,r-2}};}
+        if(inBounds(f-1,r-2) && !pieceAt(f-1,r-2).startsWith(col2)){res+={{f-1,r-2}};}
+        if(inBounds(f+2,r+1) && !pieceAt(f+2,r+1).startsWith(col2)){res+={{f+2,r+1}};}
+        if(inBounds(f-2,r+1) && !pieceAt(f-2,r+1).startsWith(col2)){res+={{f-2,r+1}};}
+        if(inBounds(f+2,r-1) && !pieceAt(f+2,r-1).startsWith(col2)){res+={{f+2,r-1}};}
+        if(inBounds(f-2,r-1) && !pieceAt(f-2,r-1).startsWith(col2)){res+={{f-2,r-1}};}
+    }
+    //WhiteKing moves
+    else if(a.endsWith("k")){
+        if(inBounds(f+1,r) && !pieceAt(f+1,r).startsWith(col2)){res+={{f+1,r}};}
+        if(inBounds(f-1,r) && !pieceAt(f-1,r).startsWith(col2)){res+={{f-1,r}};}
+        if(inBounds(f+1,r-1) && !pieceAt(f+1,r-1).startsWith(col2)){res+={{f+1,r-1}};}
+        if(inBounds(f-1,r-1) && !pieceAt(f-1,r-1).startsWith(col2)){res+={{f-1,r-1}};}
+        if(inBounds(f+1,r+1) && !pieceAt(f+1,r+1).startsWith(col2)){res+={{f+1,r+1}};}
+        if(inBounds(f-1,r+1) && !pieceAt(f-1,r+1).startsWith(col2)){res+={{f-1,r+1}};}
+        if(inBounds(f,r-1) && !pieceAt(f,r-1).startsWith(col2)){res+={{f,r-1}};}
+        if(inBounds(f,r+1) && !pieceAt(f,r+1).startsWith(col2)){res+={{f,r+1}};}
+        if(a.startsWith("w")){
+            if(wCastShort && pieceAt(5,0)=="" && pieceAt(6,0)==""){res+={{6,0}};}
+            if(wCastLong && pieceAt(3,0)=="" && pieceAt(2,0)=="" && pieceAt(1,0)==""){res+={{2,0}};}
+        } else {
+            if(bCastShort && pieceAt(5,7)=="" && pieceAt(6,7)==""){res+={{6,7}};}
+            if(bCastLong && pieceAt(3,7)=="" && pieceAt(2,7)=="" && pieceAt(1,7)==""){res+={{2,7}};}
+        }
+    }
+    return res;
+}
 void ChessBoardWidget::setLegalMoves(int f, int r) {
+    //SE re sotto attacco obbligatorio salvarlo - BLOCCARE propri movimenti che mettono re sotto scacco
     QString a = pieceAt(f,r);
     if(this->getTurn()==ChessBoardWidget::Turn::WhiteTurn && a.startsWith("w")){
-        //WhitePawns moves check
-        if(a.endsWith("p")){
-            if(pieceAt(f,r+1)==""){
-                legalMoves={{f,r+1}};
-                if(r==1 && pieceAt(f,r+2)==""){
-                    legalMoves+={{f,r+2}};
-                }
-            }
-            if(pieceAt(f-1,r+1).startsWith("b")){
-                legalMoves+={{f-1,r+1}};
-            }
-            if(pieceAt(f+1,r+1).startsWith("b")){
-                legalMoves+={{f+1,r+1}};
-            }
-            if(r==4 && lastMove.second.second==4){
-                if(lastMove.second.first==f-1 && pieceAt(f-1,r)=="bp"){
-                    legalMoves+={{f-1,r+1}};
-                } else if(lastMove.second.first==f+1 && pieceAt(f+1,r)=="bp"){
-                    legalMoves+={{f+1,r+1}};
-                }
-            }
-        }
-        //WhiteRooks-Queen moves check
-        else if(a.endsWith("r") || a.endsWith("q")){
-            int i=1;
-            while(pieceAt(f,r+i)=="" && inBounds(f,r+i)){
-                legalMoves+={{f,r+i}};
-                i++;
-            }
-            if(pieceAt(f,r+i).startsWith("b")){legalMoves+={{f,r+i}};}
-            i=1;
-            while(pieceAt(f,r-i)=="" && inBounds(f,r-i)){
-                legalMoves+={{f,r-i}};
-                i++;
-            }
-            if(pieceAt(f,r-i).startsWith("b")){legalMoves+={{f,r-i}};}
-            i=1;
-            while(pieceAt(f+i,r)=="" && inBounds(f+i,r)){
-                legalMoves+={{f+i,r}};
-                i++;
-            }
-            if(pieceAt(f+i,r).startsWith("b")){legalMoves+={{f+i,r}};}
-            i=1;
-            while(pieceAt(f-i,r)=="" && inBounds(f-i,r)){
-                legalMoves+={{f-i,r}};
-                i++;
-            }
-            if(pieceAt(f-i,r).startsWith("b")){legalMoves+={{f-i,r}};}
-        }
-        //WhiteBishops-Queen moves check
-        if(a.endsWith("b") || a.endsWith("q")){
-            int i=1;
-            while(pieceAt(f+i,r+i)=="" && inBounds(f+i,r+i)){
-                legalMoves+={{f+i,r+i}};
-                i++;
-            }
-            if(pieceAt(f+i,r+i).startsWith("b")){legalMoves+={{f+i,r+i}};}
-            i=1;
-            while(pieceAt(f+i,r-i)=="" && inBounds(f+i,r-i)){
-                legalMoves+={{f+i,r-i}};
-                i++;
-            }
-            if(pieceAt(f+i,r-i).startsWith("b")){legalMoves+={{f+i,r-i}};}
-            i=1;
-            while(pieceAt(f-i,r+i)=="" && inBounds(f-i,r+i)){
-                legalMoves+={{f-i,r+i}};
-                i++;
-            }
-            if(pieceAt(f-i,r+i).startsWith("b")){legalMoves+={{f-i,r+i}};}
-            i=1;
-            while(pieceAt(f-i,r-i)=="" && inBounds(f-i,r-i)){
-                legalMoves+={{f-i,r-i}};
-                i++;
-            }
-            if(pieceAt(f-i,r-i).startsWith("b")){legalMoves+={{f-i,r-i}};}
-        }
-        //WhiteKnights moves check
-        else if(a.endsWith("n")){
-            if(inBounds(f+1,r+2) && !pieceAt(f+1,r+2).startsWith("w")){legalMoves+={{f+1,r+2}};}
-            if(inBounds(f-1,r+2) && !pieceAt(f-1,r+2).startsWith("w")){legalMoves+={{f-1,r+2}};}
-            if(inBounds(f+1,r-2) && !pieceAt(f+1,r-2).startsWith("w")){legalMoves+={{f+1,r-2}};}
-            if(inBounds(f-1,r-2) && !pieceAt(f-1,r-2).startsWith("w")){legalMoves+={{f-1,r-2}};}
-            if(inBounds(f+2,r+1) && !pieceAt(f+2,r+1).startsWith("w")){legalMoves+={{f+2,r+1}};}
-            if(inBounds(f-2,r+1) && !pieceAt(f-2,r+1).startsWith("w")){legalMoves+={{f-2,r+1}};}
-            if(inBounds(f+2,r-1) && !pieceAt(f+2,r-1).startsWith("w")){legalMoves+={{f+2,r-1}};}
-            if(inBounds(f-2,r-1) && !pieceAt(f-2,r-1).startsWith("w")){legalMoves+={{f-2,r-1}};}
-        }
-        //WhiteKing moves check
-        else if(a.endsWith("k")){
-            //VIETARE MOVIMENTO SE RE VA IN SCACCO
-            if(inBounds(f+1,r) && !pieceAt(f+1,r).startsWith("w")){legalMoves+={{f+1,r}};}
-            if(inBounds(f-1,r) && !pieceAt(f-1,r).startsWith("w")){legalMoves+={{f-1,r}};}
-            if(inBounds(f+1,r-1) && !pieceAt(f+1,r-1).startsWith("w")){legalMoves+={{f+1,r-1}};}
-            if(inBounds(f-1,r-1) && !pieceAt(f-1,r-1).startsWith("w")){legalMoves+={{f-1,r-1}};}
-            if(inBounds(f+1,r+1) && !pieceAt(f+1,r+1).startsWith("w")){legalMoves+={{f+1,r+1}};}
-            if(inBounds(f-1,r+1) && !pieceAt(f-1,r+1).startsWith("w")){legalMoves+={{f-1,r+1}};}
-            if(inBounds(f,r-1) && !pieceAt(f,r-1).startsWith("w")){legalMoves+={{f,r-1}};}
-            if(inBounds(f,r+1) && !pieceAt(f,r+1).startsWith("w")){legalMoves+={{f,r+1}};}
-            if(wCastShort && pieceAt(5,0)=="" && pieceAt(6,0)==""){legalMoves+={{6,0}};}
-            if(wCastLong && pieceAt(3,0)=="" && pieceAt(2,0)=="" && pieceAt(1,0)==""){legalMoves+={{2,0}};}
-        }
-        update();
+        legalMoves=pieceLegalMoves(f,r,"b","w");
     } else if (this->getTurn()==ChessBoardWidget::Turn::BlackTurn && a.startsWith("b")){
-        //BlackPawns moves check
-        if(a.endsWith("p")){
-            if(pieceAt(f,r-1)==""){
-                legalMoves={{f,r-1}};
-                if(r==6 && pieceAt(f,r-2)==""){
-                    legalMoves+={{f,r-2}};
-                }
-            }
-            if(pieceAt(f-1,r-1).startsWith("w")){
-                legalMoves+={{f-1,r-1}};
-            }
-            if(pieceAt(f+1,r-1).startsWith("w")){
-                legalMoves+={{f+1,r-1}};
-            }
-            if(r==3 && lastMove.second.second==3){
-                if(lastMove.second.first==f-1 && pieceAt(f-1,r)=="wp"){
-                    legalMoves+={{f-1,r-1}};
-                } else if(lastMove.second.first==f+1 && pieceAt(f+1,r)=="wp"){
-                    legalMoves+={{f+1,r-1}};
-                }
-            }
-        }
-        //BlackRooks-Queen moves check
-        else if(a.endsWith("r") || a.endsWith("q")){
-            int i=1;
-            while(pieceAt(f,r+i)=="" && inBounds(f,r+i)){
-                legalMoves+={{f,r+i}};
-                i++;
-            }
-            if(pieceAt(f,r+i).startsWith("w")){legalMoves+={{f,r+i}};}
-            i=1;
-            while(pieceAt(f,r-i)=="" && inBounds(f,r-i)){
-                legalMoves+={{f,r-i}};
-                i++;
-            }
-            if(pieceAt(f,r-i).startsWith("w")){legalMoves+={{f,r-i}};}
-            i=1;
-            while(pieceAt(f+i,r)=="" && inBounds(f+i,r)){
-                legalMoves+={{f+i,r}};
-                i++;
-            }
-            if(pieceAt(f+i,r).startsWith("w")){legalMoves+={{f+i,r}};}
-            i=1;
-            while(pieceAt(f-i,r)=="" && inBounds(f-i,r)){
-                legalMoves+={{f-i,r}};
-                i++;
-            }
-            if(pieceAt(f-i,r).startsWith("w")){legalMoves+={{f-i,r}};}
-        }
-        //BlackBishops-Queen moves check
-        if(a.endsWith("b") || a.endsWith("q")){
-            int i=1;
-            while(pieceAt(f+i,r+i)=="" && inBounds(f+i,r+i)){
-                legalMoves+={{f+i,r+i}};
-                i++;
-            }
-            if(pieceAt(f+i,r+i).startsWith("w")){legalMoves+={{f+i,r+i}};}
-            i=1;
-            while(pieceAt(f+i,r-i)=="" && inBounds(f+i,r-i)){
-                legalMoves+={{f+i,r-i}};
-                i++;
-            }
-            if(pieceAt(f+i,r-i).startsWith("w")){legalMoves+={{f+i,r-i}};}
-            i=1;
-            while(pieceAt(f-i,r+i)=="" && inBounds(f-i,r+i)){
-                legalMoves+={{f-i,r+i}};
-                i++;
-            }
-            if(pieceAt(f-i,r+i).startsWith("w")){legalMoves+={{f-i,r+i}};}
-            i=1;
-            while(pieceAt(f-i,r-i)=="" && inBounds(f-i,r-i)){
-                legalMoves+={{f-i,r-i}};
-                i++;
-            }
-            if(pieceAt(f-i,r-i).startsWith("w")){legalMoves+={{f-i,r-i}};}
-        }
-        //BlackKnights moves check
-        else if(a.endsWith("n")){
-            if(inBounds(f+1,r+2) && !pieceAt(f+1,r+2).startsWith("b")){legalMoves+={{f+1,r+2}};}
-            if(inBounds(f-1,r+2) && !pieceAt(f-1,r+2).startsWith("b")){legalMoves+={{f-1,r+2}};}
-            if(inBounds(f+1,r-2) && !pieceAt(f+1,r-2).startsWith("b")){legalMoves+={{f+1,r-2}};}
-            if(inBounds(f-1,r-2) && !pieceAt(f-1,r-2).startsWith("b")){legalMoves+={{f-1,r-2}};}
-            if(inBounds(f+2,r+1) && !pieceAt(f+2,r+1).startsWith("b")){legalMoves+={{f+2,r+1}};}
-            if(inBounds(f-2,r+1) && !pieceAt(f-2,r+1).startsWith("b")){legalMoves+={{f-2,r+1}};}
-            if(inBounds(f+2,r-1) && !pieceAt(f+2,r-1).startsWith("b")){legalMoves+={{f+2,r-1}};}
-            if(inBounds(f-2,r-1) && !pieceAt(f-2,r-1).startsWith("b")){legalMoves+={{f-2,r-1}};}
-        }
-        //BlackKing moves check
-        else if(a.endsWith("k")){
-            if(inBounds(f+1,r) && !pieceAt(f+1,r).startsWith("b")){legalMoves+={{f+1,r}};}
-            if(inBounds(f-1,r) && !pieceAt(f-1,r).startsWith("b")){legalMoves+={{f-1,r}};}
-            if(inBounds(f+1,r-1) && !pieceAt(f+1,r-1).startsWith("b")){legalMoves+={{f+1,r-1}};}
-            if(inBounds(f-1,r-1) && !pieceAt(f-1,r-1).startsWith("b")){legalMoves+={{f-1,r-1}};}
-            if(inBounds(f+1,r+1) && !pieceAt(f+1,r+1).startsWith("b")){legalMoves+={{f+1,r+1}};}
-            if(inBounds(f-1,r+1) && !pieceAt(f-1,r+1).startsWith("b")){legalMoves+={{f-1,r+1}};}
-            if(inBounds(f,r-1) && !pieceAt(f,r-1).startsWith("b")){legalMoves+={{f,r-1}};}
-            if(inBounds(f,r+1) && !pieceAt(f,r+1).startsWith("b")){legalMoves+={{f,r+1}};}
-            if(bCastShort && pieceAt(5,7)=="" && pieceAt(6,7)==""){legalMoves+={{6,7}};}
-            if(bCastLong && pieceAt(3,7)=="" && pieceAt(2,7)=="" && pieceAt(1,7)==""){legalMoves+={{2,7}};}
-        }
-        update();
+        legalMoves=pieceLegalMoves(f,r, "w","b");
     }
+    if(a.endsWith("k")){
+        for (int i = 0; i < legalMoves.length(); i++) {
+            QString rem=pieceAt(legalMoves[i].first, legalMoves[i].second);
+            setPieceAt(legalMoves[i].first, legalMoves[i].second,a);
+            clearSquare(f,r);
+            if(isSquareAttacked(legalMoves[i].first, legalMoves[i].second)){
+                setPieceAt(legalMoves[i].first, legalMoves[i].second,rem);
+                legalMoves.remove(i);
+                i--;
+            } else{
+                setPieceAt(legalMoves[i].first, legalMoves[i].second,rem);
+            }
+            setPieceAt(f,r,a);
+        }
+    }
+    update();
 }
 
 void ChessBoardWidget::setLastMove(QPair<int,int> from, QPair<int,int> to) {
@@ -319,19 +286,47 @@ QString ChessBoardWidget::getFEN(){
     fen+= " "+std::to_string(HalfMoves)+" "+std::to_string(FullMoves);
     return fen;
 }
-/*
+
 void ChessBoardWidget::loadFEN(QString fen){
-    int fenChPos=0;
+    clearBoard();
+    int i=0;
     for(int x=7; x>=0; x--){
         for(int y=0; y<8; y++){
-            if(pieceAt(y,x)==""){emptyCells++;}
-            else{
-                if(emptyCells!=0){fen+=std::to_string(emptyCells); emptyCells=0;}
-                fen+=pieceAt(y,x).startsWith("b") ? pieceAt(y,x)[1]: pieceAt(y,x)[1].toUpper();
+            if(fen[i]=="/"){
+                y--;
             }
+            else if(fen[i].isDigit()){
+                y+=fen[i].digitValue()-1;
+            } else if(fen[i].isLower()){
+                setPieceAt(y,x, "b"+QString(fen[i]));
+            } else{
+                setPieceAt(y,x, "w"+QString(fen[i].toLower()));
+            }
+            i++;
         }
-        if(emptyCells!=0){fen+=std::to_string(emptyCells); emptyCells=0;}
-        if(x!=0){fen+="/";}
     }
+    i++;
+    playerTurn=fen[i]=="b" ? Turn::BlackTurn : Turn::WhiteTurn;
+    i+=2;
+    wCastShort = false;
+    wCastLong = false;
+    bCastShort = false;
+    bCastLong = false;
+    while(fen[i]!="-" && fen[i]!=" "){
+        wCastShort = fen[i]=="K" ? true : wCastShort;
+        wCastLong = fen[i]=="Q" ? true : wCastLong;
+        bCastShort = fen[i]== "k" ? true : bCastShort;
+        bCastLong = fen[i]=="q" ? true : bCastLong;
+        i++;
+    }
+    if(fen[i]==" "){i++;}
+    else if(fen[i]=="-"){i+=2;}
+    if(fen[i+1]=="3"){setLastMove({fen[i].toLatin1() - 'a',fen[i+1].digitValue()-2},{fen[i].toLatin1() - 'a',fen[i+1].digitValue()});}
+    else if(fen[i+1]=="6"){setLastMove({fen[i].toLatin1() - 'a',fen[i+1].digitValue()},{fen[i].toLatin1() - 'a',fen[i+1].digitValue()-2});}
+    else{i--;}
+    i+=3;
+    setHalfMoves(fen[i].digitValue());
+    i+=2;
+    setFullMoves(fen[i].digitValue());
+    update();
 }
-*/

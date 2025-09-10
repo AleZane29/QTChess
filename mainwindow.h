@@ -1,6 +1,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include "chessboardwidget.h"
 #include <QMainWindow>
 
 QT_BEGIN_NAMESPACE
@@ -16,6 +17,7 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
+    void setBoard(ChessBoardWidget *board);
 
 private slots:
     void on_actionSinglePLayer_triggered();
@@ -24,5 +26,6 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
+    ChessBoardWidget *board;
 };
 #endif // MAINWINDOW_H

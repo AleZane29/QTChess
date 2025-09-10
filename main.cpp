@@ -5,9 +5,10 @@
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
+    auto* board = new ChessBoardWidget;
     MainWindow w;
     w.show();
-    auto* board = new ChessBoardWidget;
+    w.setBoard(board);
 
     board->setOrientation(ChessBoardWidget::Orientation::WhiteBottom);
     //Import images

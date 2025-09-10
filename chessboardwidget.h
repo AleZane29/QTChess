@@ -72,6 +72,7 @@ public:
     int getHalfMoves();
     void addHalfMoves();
     void setHalfMoves(int num);
+    void setFullMoves(int num);
 
     // Carica immagini (una volta sola all’avvio)
     void loadPieceImage(const QString& id, const QString& filePath);
@@ -91,8 +92,11 @@ public:
     void setSelectedSquare(int file, int rank);
 
     void setLegalMoves(int file, int rank);
+    QVector<QPair<int,int>> pieceLegalMoves(int file, int rank, QString col1, QString col2);
 
     void setLastMove(QPair<int,int> from, QPair<int,int> to);
+
+    bool isSquareAttacked(int file, int rank);
 
     //Get or Load pieces positions trough FEN annotation
     QString getFEN();
