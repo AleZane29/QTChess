@@ -20,7 +20,7 @@ void MainWindow::setBoard(ChessBoardWidget *b){
 
 void MainWindow::on_actionSinglePLayer_triggered()
 {
-    //this->board->loadFEN("r1b1k1nr/ppp3pp/8/3PNpP1/1nB4q/8/PPPP1b1P/RNBQ1RK1 w kq f6 0 9");
+    this->board->loadFEN("rnb2bnr/pp1Pkppp/2p5/2q1p3/2P5/1P6/P2P1PPP/RNBQKBNR w KQ - 1 8");
 }
 
 

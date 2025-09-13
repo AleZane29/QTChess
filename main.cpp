@@ -1,6 +1,9 @@
 #include "mainwindow.h"
 #include "ChessBoardWidget.h"
 #include <QApplication>
+#include <QInputDialog>
+#include <QPushButton>
+#include <QHBoxLayout>
 
 int main(int argc, char *argv[])
 {
@@ -76,6 +79,7 @@ int main(int argc, char *argv[])
             }
             board->setHalfMoves(0);
         }
+
         //Castling
         if(sym.endsWith("k") && f1-f2==2){
             board->setPieceAt(3, r2, board->clearSquare(0,r2));
@@ -111,7 +115,49 @@ int main(int argc, char *argv[])
         }
 
         board->clearSquare(f1,r1);
-        board->setPieceAt(f2,r2,sym);
+        //Promotion
+        if((sym=="wp" && r2==7)||(sym=="bp" && r2==0)){
+            QDialog dialog(board);
+            dialog.setAttribute(Qt::WA_DeleteOnClose, false);
+            dialog.setWindowTitle("Promotion");
+
+            QHBoxLayout layout(&dialog);
+            bool pieceDialogSelected=false;
+
+            auto addButton = [&](const QString& id){
+                QPushButton* b = new QPushButton;
+                b->setIcon(QIcon(":/resources/" + id + ".svg"));
+                b->setIconSize(QSize(64,64));
+                layout.addWidget(b);
+                qDebug()<<id;
+                ChessBoardWidget::connect(b, &QPushButton::clicked, [board, id, f2, r2, &pieceDialogSelected, &dialog]() {
+                    board->setPieceAt(f2, r2, id);
+                    pieceDialogSelected=true;
+                    dialog.accept();
+                });
+
+            };
+
+            if (board->getTurn()==ChessBoardWidget::Turn::WhiteTurn ) {
+                addButton("wq");
+                addButton("wr");
+                addButton("wb");
+                addButton("wn");
+            } else {
+                addButton("bq");
+                addButton("br");
+                addButton("bb");
+                addButton("bn");
+            }
+            //Keep open dialog until promotion completed
+            while(!pieceDialogSelected){
+                dialog.exec();
+            }
+        } else {
+            //Normal move
+            board->setPieceAt(f2,r2,sym);
+        }
+
         board->setLastMove({f1,r1}, {f2,r2});
         if(board->getTurn()==ChessBoardWidget::Turn::BlackTurn){board->addFullMoves();}
         board->changeTurn();

@@ -74,6 +74,17 @@ void ChessBoardWidget::setSelectedSquare(int file, int rank) {
     update();
 }
 
+QPair<int,int> ChessBoardWidget::getPiecePosition(const QString& piece){
+    for(int x=7; x>=0; x--){
+        for(int y=0; y<8; y++){
+            if(pieceAt(y,x)==piece){
+                return {y,x};
+            }
+        }
+    }
+    return {-1,-1};
+}
+
 bool ChessBoardWidget::isSquareAttacked(int file, int rank){
     for(int x=7; x>=0; x--){
         for(int y=0; y<8; y++){
@@ -91,7 +102,7 @@ bool ChessBoardWidget::isSquareAttacked(int file, int rank){
     return false;
 }
 
-QVector<QPair<int,int>> ChessBoardWidget::pieceLegalMoves(int f, int r, QString col1, QString col2){
+QVector<QPair<int,int>> ChessBoardWidget::pieceLegalMoves(int f, int r, QString col1, QString col2, bool underAttack){
     QVector<QPair<int,int>> res;
     QString a = pieceAt(f,r);
 
@@ -204,7 +215,7 @@ QVector<QPair<int,int>> ChessBoardWidget::pieceLegalMoves(int f, int r, QString 
         if(inBounds(f+2,r-1) && !pieceAt(f+2,r-1).startsWith(col2)){res+={{f+2,r-1}};}
         if(inBounds(f-2,r-1) && !pieceAt(f-2,r-1).startsWith(col2)){res+={{f-2,r-1}};}
     }
-    //WhiteKing moves
+    //King moves
     else if(a.endsWith("k")){
         if(inBounds(f+1,r) && !pieceAt(f+1,r).startsWith(col2)){res+={{f+1,r}};}
         if(inBounds(f-1,r) && !pieceAt(f-1,r).startsWith(col2)){res+={{f-1,r}};}
@@ -214,24 +225,26 @@ QVector<QPair<int,int>> ChessBoardWidget::pieceLegalMoves(int f, int r, QString 
         if(inBounds(f-1,r+1) && !pieceAt(f-1,r+1).startsWith(col2)){res+={{f-1,r+1}};}
         if(inBounds(f,r-1) && !pieceAt(f,r-1).startsWith(col2)){res+={{f,r-1}};}
         if(inBounds(f,r+1) && !pieceAt(f,r+1).startsWith(col2)){res+={{f,r+1}};}
-        if(a.startsWith("w")){
-            if(wCastShort && pieceAt(5,0)=="" && pieceAt(6,0)==""){res+={{6,0}};}
-            if(wCastLong && pieceAt(3,0)=="" && pieceAt(2,0)=="" && pieceAt(1,0)==""){res+={{2,0}};}
-        } else {
-            if(bCastShort && pieceAt(5,7)=="" && pieceAt(6,7)==""){res+={{6,7}};}
-            if(bCastLong && pieceAt(3,7)=="" && pieceAt(2,7)=="" && pieceAt(1,7)==""){res+={{2,7}};}
+        if(!underAttack){
+            if(a.startsWith("w")){
+                if(wCastShort && pieceAt(5,0)=="" && pieceAt(6,0)==""){res+={{6,0}};}
+                if(wCastLong && pieceAt(3,0)=="" && pieceAt(2,0)=="" && pieceAt(1,0)==""){res+={{2,0}};}
+            } else {
+                if(bCastShort && pieceAt(5,7)=="" && pieceAt(6,7)==""){res+={{6,7}};}
+                if(bCastLong && pieceAt(3,7)=="" && pieceAt(2,7)=="" && pieceAt(1,7)==""){res+={{2,7}};}
+            }
         }
     }
     return res;
 }
 void ChessBoardWidget::setLegalMoves(int f, int r) {
-    //SE re sotto attacco obbligatorio salvarlo - BLOCCARE propri movimenti che mettono re sotto scacco
     QString a = pieceAt(f,r);
     if(this->getTurn()==ChessBoardWidget::Turn::WhiteTurn && a.startsWith("w")){
-        legalMoves=pieceLegalMoves(f,r,"b","w");
+        legalMoves=pieceLegalMoves(f,r,"b","w", isSquareAttacked(f,r));
     } else if (this->getTurn()==ChessBoardWidget::Turn::BlackTurn && a.startsWith("b")){
-        legalMoves=pieceLegalMoves(f,r, "w","b");
+        legalMoves=pieceLegalMoves(f,r, "w","b", isSquareAttacked(f,r));
     }
+    //King can't move on square attacked
     if(a.endsWith("k")){
         for (int i = 0; i < legalMoves.length(); i++) {
             QString rem=pieceAt(legalMoves[i].first, legalMoves[i].second);
@@ -246,6 +259,21 @@ void ChessBoardWidget::setLegalMoves(int f, int r) {
             }
             setPieceAt(f,r,a);
         }
+    }
+    QString col =this->getTurn()==ChessBoardWidget::Turn::WhiteTurn ? "w" : "b";
+    //White/Black-King attacked
+    for (int i = 0; i < legalMoves.length(); i++) {
+        QString rem=pieceAt(legalMoves[i].first, legalMoves[i].second);
+        setPieceAt(legalMoves[i].first, legalMoves[i].second,a);
+        clearSquare(f,r);
+        if(isSquareAttacked(getPiecePosition(col+"k").first, getPiecePosition(col+"k").second)){
+            setPieceAt(legalMoves[i].first, legalMoves[i].second,rem);
+            legalMoves.remove(i);
+            i--;
+        } else{
+            setPieceAt(legalMoves[i].first, legalMoves[i].second,rem);
+        }
+        setPieceAt(f,r,a);
     }
     update();
 }

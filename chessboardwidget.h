@@ -92,11 +92,13 @@ public:
     void setSelectedSquare(int file, int rank);
 
     void setLegalMoves(int file, int rank);
-    QVector<QPair<int,int>> pieceLegalMoves(int file, int rank, QString col1, QString col2);
+    QVector<QPair<int,int>> pieceLegalMoves(int file, int rank, QString col1, QString col2, bool underAttack = false);
 
     void setLastMove(QPair<int,int> from, QPair<int,int> to);
 
     bool isSquareAttacked(int file, int rank);
+
+    QPair<int,int> getPiecePosition(const QString& id);
 
     //Get or Load pieces positions trough FEN annotation
     QString getFEN();
@@ -226,11 +228,10 @@ protected:
         if((this->pieceAt(file, rank).startsWith("w") && this->getTurn()==Turn::WhiteTurn)
             || (this->pieceAt(file, rank).startsWith("b") && this->getTurn()==Turn::BlackTurn)
             || selected.first != -1){
-            qDebug() << this->pieceAt(file, rank);
-            emit squareClicked(file, rank);
-
             // Comportamento base: primo click seleziona, secondo propone mossa
             if (selected.first == -1) {
+
+                emit squareClicked(file, rank);
                 selected = {file, rank};
             } else if(this->legalMoves.contains({file, rank})){
                 emit moveRequested(selected.first, selected.second, file, rank);
