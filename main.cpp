@@ -4,6 +4,7 @@
 #include <QInputDialog>
 #include <QPushButton>
 #include <QHBoxLayout>
+#include <QLabel>
 
 int main(int argc, char *argv[])
 {
@@ -13,7 +14,6 @@ int main(int argc, char *argv[])
     w.show();
     w.setBoard(board);
 
-    board->setOrientation(ChessBoardWidget::Orientation::WhiteBottom);
     //Import images
     board->loadPieceImage("bp", ":/resources/bp.svg");
     board->loadPieceImage("bk", ":/resources/bk.svg");
@@ -28,35 +28,7 @@ int main(int argc, char *argv[])
     board->loadPieceImage("wr", ":/resources/wr.svg");
     board->loadPieceImage("wb", ":/resources/wb.svg");
 
-    //Place rooks
-    board->setPieceAt(7, 0, "wr");
-    board->setPieceAt(0, 0, "wr");
-    board->setPieceAt(0, 7, "br");
-    board->setPieceAt(7, 7, "br");
-
-    //Place knights
-    board->setPieceAt(6, 0, "wn");
-    board->setPieceAt(1, 0, "wn");
-    board->setPieceAt(1, 7, "bn");
-    board->setPieceAt(6, 7, "bn");
-
-    //Place bishops
-    board->setPieceAt(5, 0, "wb");
-    board->setPieceAt(2, 0, "wb");
-    board->setPieceAt(2, 7, "bb");
-    board->setPieceAt(5, 7, "bb");
-
-    //Place queens/kings
-    board->setPieceAt(3, 0, "wq");
-    board->setPieceAt(4, 0, "wk");
-    board->setPieceAt(3, 7, "bq");
-    board->setPieceAt(4, 7, "bk");
-
-    //Place pawns
-    for (int f = 0; f < 8; ++f) {
-        board->setPieceAt(f, 6, "bp");
-        board->setPieceAt(f, 1, "wp");
-    }
+    board->resetBoard();
 
     QObject::connect(board, &ChessBoardWidget::squareClicked, [&](int f,int r){
         qDebug() << "Clicked:" << char('a' + f) << r+1;
@@ -161,7 +133,36 @@ int main(int argc, char *argv[])
         board->setLastMove({f1,r1}, {f2,r2});
         if(board->getTurn()==ChessBoardWidget::Turn::BlackTurn){board->addFullMoves();}
         board->changeTurn();
+        board->addPosition(board->getFEN());
         qDebug()<<board->getFEN();
+        if(board->isGameFinished()!=ChessBoardWidget::EndGameCondition::NoFinished){
+            QDialog dialog(&w);
+            dialog.setWindowTitle("Game Over");
+            QVBoxLayout layout(&dialog);
+            QString mes ="";
+
+            if(board->isGameFinished()==ChessBoardWidget::EndGameCondition::WhiteWin){
+                mes="WHITE WIN";
+            } else if(board->isGameFinished()==ChessBoardWidget::EndGameCondition::BlackWin){
+                mes="BLACK WIN";
+            } else if(board->isGameFinished()==ChessBoardWidget::EndGameCondition::Draw){
+                mes="DRAW";
+            }
+            QLabel *label = new QLabel(mes);
+            label->setAlignment(Qt::AlignCenter);
+            layout.addWidget(label);
+
+            QPushButton *newGameBtn = new QPushButton("Nuova partita");
+            layout.addWidget(newGameBtn);
+
+            QObject::connect(newGameBtn, &QPushButton::clicked, [&](){
+                board->resetBoard();
+                dialog.accept();
+            });
+
+            dialog.exec();
+        }
+
     });
 
     w.setCentralWidget(board);

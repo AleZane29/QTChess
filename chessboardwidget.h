@@ -17,6 +17,7 @@ class ChessBoardWidget : public QWidget {
 public:
     enum class Orientation { WhiteBottom, BlackBottom };
     enum class Turn { WhiteTurn, BlackTurn };
+    enum class EndGameCondition { WhiteWin, BlackWin, Draw, NoFinished };
 
 private:
     Orientation boardOrientation = Orientation::WhiteBottom;
@@ -33,6 +34,7 @@ private:
     QPair<int,int> selected{-1, -1};
     QVector<QPair<int,int>> legalMoves;
     QPair<QPair<int,int>, QPair<int,int>> lastMove{{-1,-1},{-1,-1}};
+    QVector<QString> previousPositions;
     bool wCastShort=true;
     bool wCastLong=true;
     bool bCastShort=true;
@@ -87,6 +89,7 @@ public:
 
     // Pulisci tutta la scacchiera
     void clearBoard();
+    void resetBoard();
 
     // Selezione/Highlight manuali (puoi collegarle alla tua logica di mosse)
     void setSelectedSquare(int file, int rank);
@@ -96,13 +99,21 @@ public:
 
     void setLastMove(QPair<int,int> from, QPair<int,int> to);
 
+    QVector<QString> getPreviousPositions();
+    void addPosition(QString position);
+
     bool isSquareAttacked(int file, int rank);
 
     QPair<int,int> getPiecePosition(const QString& id);
 
+    //Check win condition of check mate / draw by stalemate / draw by 75 moves / draw by repetition
+    EndGameCondition isGameFinished();
+
     //Get or Load pieces positions trough FEN annotation
     QString getFEN();
     void loadFEN(QString FEN);
+
+    void checkKingMoves(QString a, int r, int f);
 
 signals:
     // Emette quando l'utente clicca una casella (file: 0..7 = a..h, rank: 0..7 = 1..8 dalla prospettiva del bianco)

@@ -20,12 +20,12 @@ void MainWindow::setBoard(ChessBoardWidget *b){
 
 void MainWindow::on_actionSinglePLayer_triggered()
 {
-    this->board->loadFEN("rnb2bnr/pp1Pkppp/2p5/2q1p3/2P5/1P6/P2P1PPP/RNBQKBNR w KQ - 1 8");
+    //this->board->loadFEN("8/8/k2b4/8/8/1P6/P2P1PPP/RNBQKBNR b KQ - 1 8");
 }
 
 
 void MainWindow::on_actionTwoPlayers_triggered()
 {
-
+    board->resetBoard();
 }
 

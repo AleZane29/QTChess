@@ -67,6 +67,49 @@ void ChessBoardWidget::clearBoard() {
     update();
 }
 
+void ChessBoardWidget::resetBoard(){
+    clearBoard();
+    //Place rooks
+    setPieceAt(7, 0, "wr");
+    setPieceAt(0, 0, "wr");
+    setPieceAt(0, 7, "br");
+    setPieceAt(7, 7, "br");
+
+    //Place knights
+    setPieceAt(6, 0, "wn");
+    setPieceAt(1, 0, "wn");
+    setPieceAt(1, 7, "bn");
+    setPieceAt(6, 7, "bn");
+
+    //Place bishops
+    setPieceAt(5, 0, "wb");
+    setPieceAt(2, 0, "wb");
+    setPieceAt(2, 7, "bb");
+    setPieceAt(5, 7, "bb");
+
+    //Place queens/kings
+    setPieceAt(3, 0, "wq");
+    setPieceAt(4, 0, "wk");
+    setPieceAt(3, 7, "bq");
+    setPieceAt(4, 7, "bk");
+
+    //Place pawns
+    for (int f = 0; f < 8; ++f) {
+        setPieceAt(f, 6, "bp");
+        setPieceAt(f, 1, "wp");
+    }
+
+    boardOrientation = ChessBoardWidget::Orientation::WhiteBottom;
+    playerTurn = Turn::WhiteTurn;
+    wCastShort=true;
+    wCastLong=true;
+    bCastShort=true;
+    bCastLong=true;
+    FullMoves=1;
+    HalfMoves=0;
+    update();
+}
+
 // Selezione/Highlight manuali (puoi collegarle alla tua logica di mosse)
 void ChessBoardWidget::setSelectedSquare(int file, int rank) {
     if (inBounds(file, rank)) selected = {file, rank};
@@ -278,9 +321,54 @@ void ChessBoardWidget::setLegalMoves(int f, int r) {
     update();
 }
 
+ChessBoardWidget::EndGameCondition ChessBoardWidget::isGameFinished(){
+    //Draw by 75 moves rules
+    if(HalfMoves>=75){return ChessBoardWidget::EndGameCondition::Draw;}
+    //Draw by repetition of positions
+    int count = 0;
+    for(int i=0; i<previousPositions.length()-1; i++){
+        if(previousPositions[i]==previousPositions[previousPositions.length()-1]){
+            count++;
+        }
+        if(count>=3){return ChessBoardWidget::EndGameCondition::Draw;}
+    }
+    //Check win and stalemate
+    for(int x=7; x>=0; x--){
+        for(int y=0; y<8; y++){
+            setLegalMoves(y,x);
+            if(!legalMoves.isEmpty()){
+                if(pieceAt(y,x).startsWith("w") && this->getTurn()==ChessBoardWidget::Turn::WhiteTurn){
+                    return ChessBoardWidget::EndGameCondition::NoFinished;
+                } else if(pieceAt(y,x).startsWith("b") && this->getTurn()==ChessBoardWidget::Turn::BlackTurn){
+                    return ChessBoardWidget::EndGameCondition::NoFinished;
+                }
+            }
+            legalMoves={};
+        }
+    }
+    if(this->getTurn()==ChessBoardWidget::Turn::WhiteTurn){
+        if(isSquareAttacked(getPiecePosition("wk").first, getPiecePosition("wk").second)){
+            return ChessBoardWidget::EndGameCondition::BlackWin;
+        } else {return ChessBoardWidget::EndGameCondition::Draw;}
+    } else {
+        if(isSquareAttacked(getPiecePosition("bk").first, getPiecePosition("bk").second)){
+            return ChessBoardWidget::EndGameCondition::WhiteWin;
+        } else {return ChessBoardWidget::EndGameCondition::Draw;}
+    }
+}
+
+
 void ChessBoardWidget::setLastMove(QPair<int,int> from, QPair<int,int> to) {
     lastMove = {from, to};
     update();
+}
+
+QVector<QString> ChessBoardWidget::getPreviousPositions(){
+    return previousPositions;
+}
+
+void ChessBoardWidget::addPosition(QString position){
+    previousPositions.append(position);
 }
 
 QString ChessBoardWidget::getFEN(){
