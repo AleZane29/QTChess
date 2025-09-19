@@ -28,7 +28,6 @@ private:
     QColor moveColor = QColor(0, 0, 0, 160); // pallino mosse
     QColor lastMoveColor = QColor(255, 215, 0); // giallo trasparente
 
-    // board[rank][file] -> simbolo pezzo (string)
     std::array<std::array<QString, 8>, 8> board{};
     QHash<QString, QSvgRenderer*> pieceImages;
     QPair<int,int> selected{-1, -1};
@@ -53,6 +52,8 @@ public:
     // Imposta orientamento della scacchiera
     void setOrientation(Orientation o);
     Orientation orientation() const;
+
+    void setBoard(std::array<std::array<QString, 8>, 8>);
 
     void changeTurn();
     Turn getTurn() const;
@@ -94,23 +95,24 @@ public:
     // Selezione/Highlight manuali (puoi collegarle alla tua logica di mosse)
     void setSelectedSquare(int file, int rank);
 
-    void setLegalMoves(int file, int rank);
-    QVector<QPair<int,int>> pieceLegalMoves(int file, int rank, QString col1, QString col2, bool underAttack = false);
+    QVector<QPair<int,int>> setLegalMoves(int file, int rank);
+    QVector<QPair<int,int>> pieceLegalMoves(int file, int rank, QString col1, QString col2, bool underAttack = false) const;
+    QVector<QPair<int,int>> getLegalMoves() const;
 
     void setLastMove(QPair<int,int> from, QPair<int,int> to);
 
-    QVector<QString> getPreviousPositions();
+    QVector<QString> getPreviousPositions() const;
     void addPosition(QString position);
 
-    bool isSquareAttacked(int file, int rank);
+    bool isSquareAttacked(int file, int rank) const;
 
-    QPair<int,int> getPiecePosition(const QString& id);
+    QPair<int,int> getPiecePosition(const QString& id) const;
 
     //Check win condition of check mate / draw by stalemate / draw by 75 moves / draw by repetition
     EndGameCondition isGameFinished();
 
     //Get or Load pieces positions trough FEN annotation
-    QString getFEN();
+    QString getFEN() const;
     void loadFEN(QString FEN);
 
     void checkKingMoves(QString a, int r, int f);

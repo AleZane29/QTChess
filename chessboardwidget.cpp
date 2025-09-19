@@ -117,7 +117,7 @@ void ChessBoardWidget::setSelectedSquare(int file, int rank) {
     update();
 }
 
-QPair<int,int> ChessBoardWidget::getPiecePosition(const QString& piece){
+QPair<int,int> ChessBoardWidget::getPiecePosition(const QString& piece) const{
     for(int x=7; x>=0; x--){
         for(int y=0; y<8; y++){
             if(pieceAt(y,x)==piece){
@@ -128,7 +128,11 @@ QPair<int,int> ChessBoardWidget::getPiecePosition(const QString& piece){
     return {-1,-1};
 }
 
-bool ChessBoardWidget::isSquareAttacked(int file, int rank){
+QVector<QPair<int,int>> ChessBoardWidget::getLegalMoves() const{
+    return legalMoves;
+}
+
+bool ChessBoardWidget::isSquareAttacked(int file, int rank) const{
     for(int x=7; x>=0; x--){
         for(int y=0; y<8; y++){
             if(pieceAt(y,x).startsWith("b") && this->getTurn()==ChessBoardWidget::Turn::WhiteTurn){
@@ -145,7 +149,7 @@ bool ChessBoardWidget::isSquareAttacked(int file, int rank){
     return false;
 }
 
-QVector<QPair<int,int>> ChessBoardWidget::pieceLegalMoves(int f, int r, QString col1, QString col2, bool underAttack){
+QVector<QPair<int,int>> ChessBoardWidget::pieceLegalMoves(int f, int r, QString col1, QString col2, bool underAttack) const{
     QVector<QPair<int,int>> res;
     QString a = pieceAt(f,r);
 
@@ -280,7 +284,7 @@ QVector<QPair<int,int>> ChessBoardWidget::pieceLegalMoves(int f, int r, QString 
     }
     return res;
 }
-void ChessBoardWidget::setLegalMoves(int f, int r) {
+QVector<QPair<int,int>> ChessBoardWidget::setLegalMoves(int f, int r) {
     QString a = pieceAt(f,r);
     if(this->getTurn()==ChessBoardWidget::Turn::WhiteTurn && a.startsWith("w")){
         legalMoves=pieceLegalMoves(f,r,"b","w", isSquareAttacked(f,r));
@@ -318,6 +322,7 @@ void ChessBoardWidget::setLegalMoves(int f, int r) {
         }
         setPieceAt(f,r,a);
     }
+    return legalMoves;
     update();
 }
 
@@ -363,7 +368,7 @@ void ChessBoardWidget::setLastMove(QPair<int,int> from, QPair<int,int> to) {
     update();
 }
 
-QVector<QString> ChessBoardWidget::getPreviousPositions(){
+QVector<QString> ChessBoardWidget::getPreviousPositions() const{
     return previousPositions;
 }
 
@@ -371,7 +376,7 @@ void ChessBoardWidget::addPosition(QString position){
     previousPositions.append(position);
 }
 
-QString ChessBoardWidget::getFEN(){
+QString ChessBoardWidget::getFEN() const{
     QString fen="";
     int emptyCells=0;
     for(int x=7; x>=0; x--){

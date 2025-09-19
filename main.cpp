@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include "ChessBoardWidget.h"
+#include "Engine.h"
 #include <QApplication>
 #include <QInputDialog>
 #include <QPushButton>
@@ -10,9 +11,11 @@ int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
     auto* board = new ChessBoardWidget;
+    auto* engine = new Engine;
     MainWindow w;
     w.show();
     w.setBoard(board);
+    engine->setBoard(board);
 
     //Import images
     board->loadPieceImage("bp", ":/resources/bp.svg");
@@ -134,7 +137,6 @@ int main(int argc, char *argv[])
         if(board->getTurn()==ChessBoardWidget::Turn::BlackTurn){board->addFullMoves();}
         board->changeTurn();
         board->addPosition(board->getFEN());
-        qDebug()<<board->getFEN();
         if(board->isGameFinished()!=ChessBoardWidget::EndGameCondition::NoFinished){
             QDialog dialog(&w);
             dialog.setWindowTitle("Game Over");
@@ -163,6 +165,10 @@ int main(int argc, char *argv[])
             dialog.exec();
         }
 
+
+        //qDebug()<<board->getFEN()<<engine->evalutePosition(board->getFEN());
+        qDebug()<<engine->minimax(board->getFEN(), 3, -INFINITY, +INFINITY, board->getTurn()==ChessBoardWidget::Turn::WhiteTurn);
+        //qDebug()<<engine->evalutePosition("rnbqkbnr/ppppppp1/7p/8/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 1");
     });
 
     w.setCentralWidget(board);

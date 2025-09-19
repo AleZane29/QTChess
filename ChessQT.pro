@@ -12,11 +12,13 @@ CONFIG += c++17
 
 SOURCES += \
     chessboardwidget.cpp \
+    engine.cpp \
     main.cpp \
     mainwindow.cpp
 
 HEADERS += \
     chessboardwidget.h \
+    engine.h \
     mainwindow.h
 
 FORMS += \
